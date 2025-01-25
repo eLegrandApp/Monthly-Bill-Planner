@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Bill Planner</title>
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6c757d, #343a40), 
+                        url('https://i.postimg.cc/BnSj9tSs/blue-2384333-1920.png') no-repeat center/ cover;
+            background-blend-mode: overlay;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        h1, h2, h3 { text-align: center; }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* Container Styles */
+        .app-container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Form Group */
+        .form-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            flex: 1;
+        }
+        input.error, select.error {
+            border-color: red;
+        }
+
+        /* Buttons */
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover { background-color: #0056b3; }
+        .remove-button {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 3px 8px;
+            font-size: 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .remove-button:hover { background-color: #b02a37; }
+
+        /* List and Item Styles */
+        .list-container { margin-top: 20px; }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .item-name { flex: 3; }
+        .item-cost { 
+            flex: 1;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        /* Total Container */
+        .total-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .total-dialogue {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .total-label { font-weight: bold; }
+        .total-dialogue input {
+            width: 75px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            text-align: right;
+        }
+
+        /* Save Container */
+        .save-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .save-container input, .save-container button { padding: 5px; }
+
+        /* Saved Document */
+        .saved-document {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 0px;
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+        }
+        .saved-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .saved-table {
+            margin: 0 auto;
+            width: 90%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .saved-table th, .saved-table td {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            text-align: left; /* Left-align table content */
+        }
+        .saved-table th {
+            background-color: #007bff;
+            color: white;
+        }
+        .saved-document button {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 3px 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .saved-document button:hover { background-color: #b02a37; }
+
+        /* Reminder Container */
+        .reminder-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .reminder-container input {
+            padding: 5px;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monthly Bill Planner</h1>
+    <div class="app-container">
+        <div class="form-group">
+            <input type="text" id="custom-item-name" placeholder="Item Name">
+            <input type="number" id="custom-item-quantity" placeholder="Quantity">
+            <input type="number" id="custom-item-cost" placeholder="Cost">
+            <select id="custom-item-unit">
+                <option value="Bill">Bill</option>
+                <option value="List">List</option>
+                <option value="Others">pcs</option>
+            </select>
+            <button onclick="addCustomItem()">Add Item</button>
+        </div>
+        <h2>Add Your List</h2>
+        <div id="user-list" class="list-container"></div>
+        <div class="total-container">
+            <div class="total-dialogue">
+                <span class="total-label">Total:</span>
+                <input type="text" id="total-cost" readonly>
+            </div>
+        </div>
+        <div class="save-container">
+            <input type="date" id="planner-date">
+            <button onclick="saveList()">Save</button>
+        </div>
+        <div id="saved-document" class="saved-document">
+            <div id="saved-title" class="saved-title"></div>
+            <table class="saved-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody id="saved-content"></tbody>
+            </table>
+            <button onclick="removeSavedBill()">Remove Bill</button>
+        </div>
+        <h3>Set Reminder</h3>
+        <div class="reminder-container">
+            <input type="date" id="reminder-date">
+        </div>
+    </div>
+    <footer>© 2025 Monthly Bill Planner</footer>
+    <script>
+        const userItems = [];
+        const userList = document.getElementById("user-list");
+        const totalCostInput = document.getElementById("total-cost");
+        const savedDocument = document.getElementById("saved-document");
+        const savedContent = document.getElementById("saved-content");
+        const savedTitle = document.getElementById("saved-title");
+
+        const highlightError = (element) => {
+            element.classList.add("error");
+            element.addEventListener("input", () => element.classList.remove("error"), { once: true });
+        };
+
+        const addCustomItem = () => {
+            const name = document.getElementById("custom-item-name");
+            const quantity = document.getElementById("custom-item-quantity");
+            const cost = document.getElementById("custom-item-cost");
+            const unit = document.getElementById("custom-item-unit");
+
+            let hasError = false;
+            if (!name.value.trim()) { highlightError(name); hasError = true; }
+            if (!quantity.value || parseFloat(quantity.value) <= 0) { highlightError(quantity); hasError = true; }
+            if (!cost.value || parseFloat(cost.value) <= 0) { highlightError(cost); hasError = true; }
+
+            if (hasError) return;
+
+            userItems.push({
+                name: name.value.trim(),
+                quantity: parseFloat(quantity.value),
+                cost: parseFloat(cost.value),
+                unit: unit.value,
+            });
+
+            renderList();
+            name.value = quantity.value = cost.value = '';
+        };
+
+        const renderList = () => {
+            userList.innerHTML = '';
+            let totalCost = 0;
+
+            userItems.forEach((item, index) => {
+                totalCost += item.cost * item.quantity;
+                userList.innerHTML += `
+                    <div class="list-item">
+                        <span class="item-name">${item.name} (${item.quantity} ${item.unit})</span>
+                        <span class="item-cost">$${(item.cost * item.quantity).toFixed(2)}</span>
+                        <button class="remove-button" onclick="removeItem(${index})">X</button>
+                    </div>`;
+            });
+
+            totalCostInput.value = `$${totalCost.toFixed(2)}`;
+        };
+
+        const saveList = () => {
+            const plannerDate = document.getElementById("planner-date");
+            if (!plannerDate.value) {
+                highlightError(plannerDate);
+                return;
+            }
+
+            savedTitle.textContent = `My Month Bill / ${plannerDate.value}`;
+            savedContent.innerHTML = userItems.map(item => `
+                <tr>
+                    <td>${item.name} (${item.quantity} ${item.unit})</td>
+                    <td>$${(item.cost * item.quantity).toFixed(2)}</td>
+                </tr>`).join('');
+            savedDocument.style.display = 'block';
+        };
+
+        const removeItem = (index) => {
+            userItems.splice(index, 1);
+            renderList();
+        };
+
+        const removeSavedBill = () => {
+            savedDocument.style.display = 'none';
+        };
+    </script>
+</body>
+</html>
